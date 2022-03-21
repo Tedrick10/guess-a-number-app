@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import * as ScreenOrientation from "expo-screen-orientation";
 
 // Components
 import NumberContainer from "../components/NumberContainer";
@@ -39,6 +40,8 @@ const renderListItem = (listLength, itemData) => (
 );
 
 const GameScreen = (props) => {
+  ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
+
   const { userChoice, onGameOver } = props;
   const initialGuess = generateRandomBetween(1, 100, userChoice);
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
@@ -79,6 +82,41 @@ const GameScreen = (props) => {
     // setRounds((prevRound) => prevRound + 1);
     setpassGuesses((prevGuesses) => [nextNumber.toString(), ...prevGuesses]);
   };
+
+  if (Dimensions.get("window").height < 500) {
+    return (
+      <View style={styles.screen}>
+        <Text style={DefaultStyles.title}>Opponent's Guess</Text>
+        <NumberContainer>{currentGuess}</NumberContainer>
+        <View style={styles.controls}>
+          {/* <Button title="LOWER" onPress={nextGuessHandler.bind(this, "lower")} />
+          <Button
+            title="GREATER"
+            onPress={nextGuessHandler.bind(this, "greater")}
+          /> */}
+          <MainButton onPress={nextGuessHandler.bind(this, "lower")}>
+            <Ionicons name="md-remove" size={24} color="white" />
+          </MainButton>
+          <MainButton onPress={nextGuessHandler.bind(this, "greater")}>
+            <Ionicons name="md-add" size={24} color="white" />
+          </MainButton>
+        </View>
+        <View style={styles.listContainer}>
+          {/* <ScrollView contentContainerStyle={styles.list}>
+            {passGuesses.map((guess, index) =>
+              renderListItem(guess, passGuesses.length - index)
+            )}
+          </ScrollView> */}
+          <FlatList
+            keyExtractor={(item) => item}
+            data={passGuesses}
+            renderItem={renderListItem.bind(this, passGuesses.length)}
+            contentContainerStyle={styles.list}
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -145,6 +183,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
+  },
+  controls: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "80%",
+    alignItems: "center",
   },
 });
 
